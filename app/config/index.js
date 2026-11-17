@@ -10,6 +10,11 @@ const config = {
         jwtSecret: process.env.JWT_SECRET || "dev-secret-ct449-quanlymuonsach",
         jwtExpires: "8h",
     },
+    rules: {
+        maxViolations: 3,
+        maxBorrowAtOnce: 5,
+        borrowDays: 14,
+    },
 };
 
 module.exports = config;
