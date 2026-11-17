@@ -106,6 +106,9 @@ exports.update = async (req, res, next) => {
 
 // Xóa nhân viên
 exports.delete = async (req, res, next) => {
+    if (req.user?.id === req.params.id) {
+        return next(new ApiError(400, "Không thể tự xóa tài khoản của mình"));
+    }
     try {
         const service = new NhanVienService(MongoDB.client);
         const document = await service.delete(req.params.id);

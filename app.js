@@ -4,6 +4,7 @@ const nhaxuatbanRouter = require("./app/routes/nhaxuatban.route");
 const sachRouter = require("./app/routes/sach.route");
 const docgiaRouter = require("./app/routes/docgia.route");
 const nhanvienRouter = require("./app/routes/nhanvien.route");
+const authRouter = require("./app/routes/auth.route");
 const ApiError = require("./app/api-error");
 
 const app = express();
@@ -19,6 +20,7 @@ app.use("/api/nhaxuatban", nhaxuatbanRouter);
 app.use("/api/sach", sachRouter);
 app.use("/api/docgia", docgiaRouter);
 app.use("/api/nhanvien", nhanvienRouter);
+app.use("/api/auth", authRouter);
 
 // Xử lý 404
 app.use((req, res, next) => {
