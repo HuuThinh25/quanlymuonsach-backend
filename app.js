@@ -1,29 +1,31 @@
 const express = require("express");
 const cors = require("cors");
 const nhaxuatbanRouter = require("./app/routes/nhaxuatban.route");
+const sachRouter = require("./app/routes/sach.route");
+const docgiaRouter = require("./app/routes/docgia.route");
+const nhanvienRouter = require("./app/routes/nhanvien.route");
 const ApiError = require("./app/api-error");
 
 const app = express();
 
-// 1. Middleware chung (phải đứng trước route)
 app.use(cors());
 app.use(express.json());
 
-// 2. Route
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to contact book application." });
+    res.json({ message: "Welcome to library management application." });
 });
 
 app.use("/api/nhaxuatban", nhaxuatbanRouter);
+app.use("/api/sach", sachRouter);
+app.use("/api/docgia", docgiaRouter);
+app.use("/api/nhanvien", nhanvienRouter);
 
-// 3. Xử lý 404 (sau tất cả route)
+// Xử lý 404
 app.use((req, res, next) => {
-    // Code ở đây chạy khi không có route nào khớp yêu cầu.
-    // Gọi next() để chuyển sang middleware xử lý lỗi
     return next(new ApiError(404, "Resource not found"));
 });
 
-// 4. Middleware xử lý lỗi (đặt cuối cùng)
+// Middleware xử lý lỗi (đặt cuối cùng)
 app.use((err, req, res, next) => {
     return res.status(err.statusCode || 500).json({
         message: err.message || "Internal Server Error",

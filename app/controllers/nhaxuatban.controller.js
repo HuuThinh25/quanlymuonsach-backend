@@ -73,6 +73,18 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const service = new NhaXuatBanService(MongoDB.client);
+        const nxb = await service.findById(req.params.id);
+        if (!nxb) {
+            return next(new ApiError(404, "Không tìm thấy nhà xuất bản"));
+        }
+
+        // Không xóa nhà xuất bản còn sách tham chiếu
+        const sach = MongoDB.client.db().collection("sach");
+        const soSach = await sach.countDocuments({ MaNXB: nxb.MaNXB });
+        if (soSach > 0) {
+            return next(new ApiError(409, "Không thể xóa nhà xuất bản đang có sách tham chiếu"));
+        }
+
         const document = await service.delete(req.params.id);
         if (!document) {
             return next(new ApiError(404, "Không tìm thấy nhà xuất bản"));
