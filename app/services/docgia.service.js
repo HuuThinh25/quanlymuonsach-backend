@@ -15,8 +15,10 @@ class DocGiaService {
             Phai: payload.Phai,
             DiaChi: payload.DiaChi,
             DienThoai: payload.DienThoai,
+            Email: payload.Email,
             Password: payload.Password,
             SoLanViPham: payload.SoLanViPham,
+            NgayDangKy: payload.NgayDangKy,
         };
 
         // Xóa các trường undefined
@@ -54,6 +56,10 @@ class DocGiaService {
 
     async findByMa(maDocGia) {
         return await this.DocGia.findOne({ MaDocGia: maDocGia });
+    }
+
+    async findByEmail(email) {
+        return await this.DocGia.findOne({ Email: email });
     }
 
     async findByName(name) {

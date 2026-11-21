@@ -5,11 +5,11 @@ const { requireAuth, requireRole } = require("../middlewares/auth.middleware");
 const router = express.Router();
 
 router.route("/")
-    .get(requireAuth, nhaxuatban.findAll)
+    .get(nhaxuatban.findAll)
     .post(requireAuth, requireRole("nhanvien"), nhaxuatban.create);
 
 router.route("/:id")
-    .get(requireAuth, nhaxuatban.findOne)
+    .get(nhaxuatban.findOne)
     .put(requireAuth, requireRole("nhanvien"), nhaxuatban.update)
     .delete(requireAuth, requireRole("nhanvien"), nhaxuatban.delete);
 

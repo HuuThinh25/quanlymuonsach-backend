@@ -1,12 +1,11 @@
 const express = require("express");
 const docgia = require("../controllers/docgia.controller");
-const { requireAuth, requireRole } = require("../middlewares/auth.middleware");
+const { requireAuth, requireRole, requireQuanLy } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
 router.route("/")
-    .get(requireAuth, requireRole("nhanvien"), docgia.findAll)
-    .post(requireAuth, requireRole("nhanvien"), docgia.create);
+    .get(requireAuth, requireRole("nhanvien"), docgia.findAll);
 
 // Route cụ thể phải đứng trước /:id
 router.route("/:id/xoa-vi-pham")
@@ -14,7 +13,6 @@ router.route("/:id/xoa-vi-pham")
 
 router.route("/:id")
     .get(requireAuth, requireRole("nhanvien"), docgia.findOne)
-    .put(requireAuth, requireRole("nhanvien"), docgia.update)
-    .delete(requireAuth, requireRole("nhanvien"), docgia.delete);
+    .delete(requireAuth, requireRole("nhanvien"), requireQuanLy, docgia.delete);
 
 module.exports = router;

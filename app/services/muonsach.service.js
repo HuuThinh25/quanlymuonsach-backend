@@ -134,19 +134,19 @@ class MuonSachService {
     }
 
     // Tăng số lần vi phạm của độc giả
-    async incrementViPham(maDocGia) {
+    async incrementViPham(maDocGia, count = 1) {
         return await this.DocGia.findOneAndUpdate(
             { MaDocGia: maDocGia },
-            { $inc: { SoLanViPham: 1 } },
+            { $inc: { SoLanViPham: count } },
             { returnDocument: "after", projection: { Password: 0 } }
         );
     }
 
     // Giảm số lần vi phạm khi cần hoàn tác
-    async decrementViPham(maDocGia) {
+    async decrementViPham(maDocGia, count = 1) {
         return await this.DocGia.findOneAndUpdate(
             { MaDocGia: maDocGia, SoLanViPham: { $gt: 0 } },
-            { $inc: { SoLanViPham: -1 } },
+            { $inc: { SoLanViPham: -count } },
             { returnDocument: "after", projection: { Password: 0 } }
         );
     }

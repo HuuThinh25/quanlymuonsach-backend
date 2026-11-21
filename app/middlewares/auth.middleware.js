@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config");
 const ApiError = require("../api-error");
+const MongoDB = require("../utils/mongodb.util");
+const NhanVienService = require("../services/nhanvien.service");
 
 // Middleware xác thực: kiểm tra token JWT trong header Authorization
 const requireAuth = (req, res, next) => {
@@ -29,4 +31,22 @@ const requireRole = (...roles) => {
     };
 };
 
-module.exports = { requireAuth, requireRole };
+// Middleware chỉ QuanLy: đọc ChucVu từ database ở mỗi lần gọi
+const requireQuanLy = async (req, res, next) => {
+    try {
+        if (!req.user || req.user.role !== "nhanvien") {
+            return next(new ApiError(403, "Bạn không có quyền truy cập"));
+        }
+        const service = new NhanVienService(MongoDB.client);
+        const nv = await service.findById(req.user.id);
+        if (!nv || nv.ChucVu !== "QuanLy") {
+            return next(new ApiError(403, "Chỉ Quản lý mới có quyền này"));
+        }
+        return next();
+    } catch (error) {
+        console.log(error);
+        return next(new ApiError(500, "Lỗi khi kiểm tra quyền quản lý"));
+    }
+};
+
+module.exports = { requireAuth, requireRole, requireQuanLy };

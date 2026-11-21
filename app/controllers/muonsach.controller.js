@@ -185,13 +185,12 @@ exports.tra = async (req, res, next) => {
         }
 
         const ngayTra = new Date();
-        // Xác định vi phạm: mỗi phiếu tối đa 1 dấu (Hong ưu tiên, sau đó trễ hạn)
+        const hong = TinhTrangSach === "Hong";
+        const quaHan = !!(phieu.HanTra && ngayTra > new Date(phieu.HanTra));
         let viPham = null;
-        if (TinhTrangSach === "Hong") {
-            viPham = "HuHong";
-        } else if (phieu.HanTra && ngayTra > new Date(phieu.HanTra)) {
-            viPham = "QuaHan";
-        }
+        if (hong) viPham = "HuHong";
+        else if (quaHan) viPham = "QuaHan";
+        const soDauViPham = (hong ? 1 : 0) + (quaHan ? 1 : 0);
 
         // Thứ tự thao tác để hạn chế nửa vời:
         // 1) Cộng sách nguyên tử (không vượt SoQuyen, sách hỏng vẫn cộng lại).
@@ -220,8 +219,8 @@ exports.tra = async (req, res, next) => {
         }
 
         let soLanViPham = null;
-        if (viPham) {
-            const docgia = await service.incrementViPham(phieu.MaDocGia);
+        if (soDauViPham > 0) {
+            const docgia = await service.incrementViPham(phieu.MaDocGia, soDauViPham);
             soLanViPham = docgia ? docgia.SoLanViPham : null;
 
             const updatedViPham = await service.updatePhieu(
@@ -230,17 +229,16 @@ exports.tra = async (req, res, next) => {
                 { ViPham: viPham }
             );
             if (!updatedViPham) {
-                // Hoàn tác tăng vi phạm nếu không ghi được ViPham vào phiếu
-                await service.decrementViPham(phieu.MaDocGia);
+                await service.decrementViPham(phieu.MaDocGia, soDauViPham);
                 return next(new ApiError(500, "Lỗi khi ghi nhận vi phạm trả sách"));
             }
         }
 
-        const result = viPham ? await service.findById(req.params.id) : updated;
-        if (viPham) {
+        const result = soDauViPham > 0 ? await service.findById(req.params.id) : updated;
+        if (soDauViPham > 0) {
             return res.send({ ...result, viPham, soLanViPham });
         }
-        return res.send(result);
+        return res.send(updated);
     } catch (error) {
         console.log(error);
         return next(error.statusCode ? error : new ApiError(500, "Lỗi khi ghi trả sách"));

@@ -4,11 +4,17 @@ const MongoDB = require("../app/utils/mongodb.util");
 const NhanVienService = require("../app/services/nhanvien.service");
 
 async function main() {
-    const [msnv, matKhau, ...hoTenParts] = process.argv.slice(2);
-    const hoTenNV = hoTenParts.join(" ");
+    const [msnv, matKhau, ...rest] = process.argv.slice(2);
+    // HoTenNV có thể gồm nhiều từ; ChucVu là tham số cuối nếu là QuanLy/NhanVien
+    let chucVu = "NhanVien";
+    let hoTenNV = rest.join(" ");
+    if (rest.length > 0 && (rest[rest.length - 1] === "QuanLy" || rest[rest.length - 1] === "NhanVien")) {
+        chucVu = rest.pop();
+        hoTenNV = rest.join(" ");
+    }
 
     if (!msnv || !matKhau || !hoTenNV) {
-        console.log("Cách dùng: node scripts/seed-nhanvien.js <MSNV> <matkhau> <HoTenNV>");
+        console.log("Cách dùng: node scripts/seed-nhanvien.js <MSNV> <matkhau> <HoTenNV> [ChucVu=QuanLy|NhanVien]");
         return;
     }
 
@@ -28,8 +34,9 @@ async function main() {
             MSNV: msnv,
             HoTenNV: hoTenNV,
             Password: hashedPassword,
+            ChucVu: chucVu,
         });
-        console.log(`Đã tạo nhân viên "${msnv}" thành công.`);
+        console.log(`Đã tạo nhân viên "${msnv}" (ChucVu: ${chucVu}) thành công.`);
     } catch (error) {
         console.error("Lỗi khi tạo nhân viên:", error);
         process.exitCode = 1;

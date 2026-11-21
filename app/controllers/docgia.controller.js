@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const DocGiaService = require("../services/docgia.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
+const config = require("../config");
 
 const DIEN_THOAI_REGEX = /^(09|03|07|08|05)[0-9]{8}$/;
 
@@ -23,8 +24,8 @@ exports.create = async (req, res, next) => {
     if (!req.body?.Password || req.body.Password.length < 6) {
         return next(new ApiError(400, "Mật khẩu bắt buộc và phải có ít nhất 6 ký tự"));
     }
-    if (req.body.Phai !== undefined && req.body.Phai !== "Nam" && req.body.Phai !== "Nu") {
-        return next(new ApiError(400, "Phái chỉ được là \"Nam\" hoặc \"Nu\""));
+    if (req.body.Phai !== undefined && req.body.Phai !== "Nam" && req.body.Phai !== "Nữ") {
+        return next(new ApiError(400, "Phái chỉ được là \"Nam\" hoặc \"Nữ\""));
     }
     if (req.body.DienThoai && !DIEN_THOAI_REGEX.test(req.body.DienThoai)) {
         return next(new ApiError(400, "Số điện thoại không hợp lệ"));
@@ -68,10 +69,21 @@ exports.create = async (req, res, next) => {
 exports.findAll = async (req, res, next) => {
     try {
         const service = new DocGiaService(MongoDB.client);
-        const { name } = req.query;
-        const documents = name
-            ? await service.findByName(name)
-            : await service.find({});
+        const { name, cam } = req.query;
+        let documents;
+        if (name) {
+            documents = await service.findByName(name);
+        } else {
+            const filter = {};
+            if (cam === "true") {
+                filter.SoLanViPham = { $gte: config.rules.maxViolations };
+            }
+            documents = await service.find(filter);
+        }
+        if (cam === "true" && name) {
+            // combine: filter name results by cam
+            documents = documents.filter((d) => (d.SoLanViPham || 0) >= config.rules.maxViolations);
+        }
         return res.send(documents);
     } catch (error) {
         console.log(error);

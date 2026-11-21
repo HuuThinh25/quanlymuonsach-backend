@@ -14,6 +14,7 @@ class NhanVienService {
             ChucVu: payload.ChucVu,
             DiaChi: payload.DiaChi,
             SoDienThoai: payload.SoDienThoai,
+            Email: payload.Email,
         };
 
         // Xóa các trường undefined
@@ -51,6 +52,10 @@ class NhanVienService {
 
     async findByMa(msnv) {
         return await this.NhanVien.findOne({ MSNV: msnv });
+    }
+
+    async findByEmail(email) {
+        return await this.NhanVien.findOne({ Email: email });
     }
 
     async findByName(name) {

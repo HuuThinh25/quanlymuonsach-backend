@@ -2,6 +2,7 @@ const SachService = require("../services/sach.service");
 const NhaXuatBanService = require("../services/nhaxuatban.service");
 const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
+const config = require("../config");
 
 // Hàm escape ký tự đặc biệt regex khi tìm kiếm theo tên
 function escapeRegex(text) {
@@ -60,7 +61,7 @@ exports.create = async (req, res, next) => {
 exports.findAll = async (req, res, next) => {
     try {
         const sachService = new SachService(MongoDB.client);
-        const { name, theloai, manxb } = req.query;
+        const { name, theloai, manxb, saphet } = req.query;
         const filter = {};
 
         if (name) {
@@ -71,6 +72,9 @@ exports.findAll = async (req, res, next) => {
         }
         if (manxb) {
             filter.MaNXB = manxb;
+        }
+        if (saphet === "true") {
+            filter.SoQuyenCon = { $lte: config.rules.lowStock };
         }
 
         const documents = await sachService.find(filter);
